@@ -1,0 +1,21 @@
+import numpy as np
+from sklearn.decomposition import PCA
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import scale
+
+plt.ion()
+
+data = pd.read_csv('wine.data', names=['Alcohol', 'Malic', 'Ash', 'Alcalinity', 'Magnesium', 'phenols', 'Flavanoids', 'Nonflavanoid', 'Proanthocyanins', 'Color', 'Hue', 'OD280_OD315', 'Proline'])
+
+
+d = data.ix[:, data.columns != 'Alcohol']
+
+X=scale(data.values)
+
+pca.explained_variance_ratio_
+
+cumulated_var = np.cumsum(np.round(pca.explained_variance_ratio_, decimals=4)*100)
+
+plt.plot(cumulated_var)
+
