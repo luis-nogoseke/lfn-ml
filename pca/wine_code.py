@@ -84,3 +84,19 @@ def svd(data, S=2):
     plt.xlabel('SVD1')
     plt.ylabel('SVD2')
     plt.show()
+
+
+
+
+
+
+
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn import cross_validation
+from sklearn.pipeline import Pipeline
+
+pipe_rf = Pipeline([('pca', PCA(n_components=8)), ('clf',DecisionTreeRegressor(max_depth=10))])
+
+scores = cross_validation.cross_val_score(pipe_rf, d, t.values.ravel(), cv=10, scoring='r2')
+scores.mean()
