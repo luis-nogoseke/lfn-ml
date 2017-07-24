@@ -98,21 +98,9 @@ time = 0.
 for i in range(500):
     start = timeit.timeit()
     svd(X, 1)
-    end = timeit.timeit()    
+    end = timeit.timeit()
     time += end - start
 time / 500.
-
-
-from sklearn.tree import DecisionTreeRegressor
-from sklearn import cross_validation
-from sklearn.pipeline import Pipeline
-
-pipe_rf = Pipeline([('pca', PCA(n_components=8)), ('clf',DecisionTreeRegressor(max_depth=10))])
-
-scores = cross_validation.cross_val_score(pipe_rf, d, t.values.ravel(), cv=10, scoring='r2')
-scores.mean()
-
-
 
 # Kernel PCA
 kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
@@ -124,3 +112,30 @@ for i in range(500):
     time += end - start
 time / 500.
 
+<<<<<<< Updated upstream
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    colors = ['blue','red','black']
+    for i in range(samples):
+        ax.scatter(newdata[i,0],newdata[i,1], color= colors[int(data[i,-1])])
+    plt.xlabel('SVD1')
+    plt.ylabel('SVD2')
+    plt.show()
+
+
+
+
+
+
+
+
+from sklearn.tree import DecisionTreeRegressor
+from sklearn import cross_validation
+from sklearn.pipeline import Pipeline
+
+pipe_rf = Pipeline([('pca', PCA(n_components=8)), ('clf',DecisionTreeRegressor(max_depth=10))])
+
+scores = cross_validation.cross_val_score(pipe_rf, d, t.values.ravel(), cv=10, scoring='r2')
+scores.mean()
+=======
+>>>>>>> Stashed changes
