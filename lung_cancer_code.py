@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA, KernelPCA, IncrementalPCA, SparsePCA
+from sklearn.decomposition import PCA, KernelPCA, FastICA, MiniBatchSparsePCA
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import model_selection
 from sklearn.pipeline import Pipeline
@@ -16,13 +16,25 @@ data = pd.read_csv('../clean2.data')
 target = data.ix[:, -1]
 d = data.ix[:, 2:168]
 
+data = pd.read_csv('../wdbc.data')
+target = data.ix[:, 1]
+target.replace('B', 0)
+target.replace('M', 1)
+d = data.ix[:, 2:32]
+
+
+data = pd.read_csv('../SPECTF.data')
+target = data.ix[:, 0]
+d = data.ix[:, 1:45]
+
+
 # PCA
 
 
 
 def pca(matrix, plot=False, dataset_name=''):
     """ Calculate matrix PCA  """
-	
+
     # Standardize the data
     matrix = StandardScaler().fit_transform(matrix.values)
 
@@ -102,33 +114,36 @@ for i in range(500):
 time / 500.
 
 # Kernel PCA
-kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
+kpca = KernelPCA(aernel="rbf", fit_inverse_transform=true, gamma=10)
 time = 0.
 for i in range(500):
     start = timeit.timeit()
-    kpca.fit_transform(X)
+    kpca.fit_transform(x)
     end = timeit.timeit()
     time += end - start
 time / 500.
 
-
-
+tree = DecisionTreeClassifier()
+scores = model_selection.cross_val_score(tree, d, target, cv=10, scoring='accuracy')
+scores.mean()
 
 pipe_rf = Pipeline([('pca', PCA(n_components=0.9)), ('clf',DecisionTreeClassifier())])
-scores = model_selection.cross_val_score(pipe_rf, d, target cv=10, scoring='accuracy')
-scores.mean()
-
-
-
-pipe_rf = Pipeline([('pca', KernelPCA(kernel="rbf")), ('clf',DecisionTreeClassifier())])
 scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
 scores.mean()
 
 
-pipe_rf = Pipeline([('pca', IncrementalPCA()), ('clf',DecisionTreeClassifier())])
+pipe_rf = Pipeline([('pca', kernelpca(kernel="rbf")), ('clf',decisiontreeclassifier())])
 scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
 scores.mean()
 
-pipe_rf = Pipeline([('pca', SparsePCA()), ('clf',DecisionTreeClassifier())])
+
+pipe_rf = Pipeline([('pca', FastICA(n_components=22, whiten=True, max_iter=500)), ('clf',decisiontreeclassifier())])
 scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
 scores.mean()
+
+
+rng = np.random.RandomState(0)
+pipe_rf = Pipeline([('pca', MiniBatchSparsePCA(n_components=22, alpha=0.8, n_iter=100, batch_size=3, random_state=rng)), ('clf',DecisionTreeClassifier())])
+scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
+scores.mean()
+
