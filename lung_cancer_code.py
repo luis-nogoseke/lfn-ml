@@ -3,30 +3,28 @@ import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA, KernelPCA
-
+from sklearn.decomposition import PCA, KernelPCA, IncrementalPCA, SparsePCA
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import model_selection
+from sklearn.pipeline import Pipeline
 from sklearn import datasets
 import timeit
 
 plt.ion()
 
-
-data = pd.read_csv('../wine.data',
-                   names=['Alcohol', 'Malic', 'Ash',
-                   'Alcalinity', 'Magnesium', 'phenols', 'Flavanoids',
-                   'Nonflavanoid', 'Proanthocyanins', 'Color', 'Hue',
-                   'OD280_OD315', 'Proline'])
-
-d = data.ix[:, data.columns != 'Alcohol']
+data = pd.read_csv('../clean2.data')
+target = data.ix[:, -1]
+d = data.ix[:, 2:168]
 
 # PCA
 
-# Standardize the data
-X = StandardScaler().fit_transform(d.values)
 
 
 def pca(matrix, plot=False, dataset_name=''):
     """ Calculate matrix PCA  """
+	
+    # Standardize the data
+    matrix = StandardScaler().fit_transform(matrix.values)
 
     # Calculate the covariance matrix
     cov_m = np.cov(matrix.T)
@@ -62,7 +60,8 @@ def pca(matrix, plot=False, dataset_name=''):
 # SVD
 
 def svd(data, target, S=2, plot=False):
-
+    # Standardize the data
+    data = StandardScaler().fit_transform(data.values)
     #calculate SVD
     U, s, V = np.linalg.svd(data)
     Sig = np.mat(np.eye(S)*s[:S])
@@ -102,18 +101,6 @@ for i in range(500):
     time += end - start
 time / 500.
 
-
-from sklearn.tree import DecisionTreeRegressor
-from sklearn import cross_validation
-from sklearn.pipeline import Pipeline
-
-pipe_rf = Pipeline([('pca', PCA(n_components=8)), ('clf',DecisionTreeRegressor(max_depth=10))])
-
-scores = cross_validation.cross_val_score(pipe_rf, d, t.values.ravel(), cv=10, scoring='r2')
-scores.mean()
-
-
-
 # Kernel PCA
 kpca = KernelPCA(kernel="rbf", fit_inverse_transform=True, gamma=10)
 time = 0.
@@ -124,3 +111,24 @@ for i in range(500):
     time += end - start
 time / 500.
 
+
+
+
+pipe_rf = Pipeline([('pca', PCA(n_components=0.9)), ('clf',DecisionTreeClassifier())])
+scores = model_selection.cross_val_score(pipe_rf, d, target cv=10, scoring='accuracy')
+scores.mean()
+
+
+
+pipe_rf = Pipeline([('pca', KernelPCA(kernel="rbf")), ('clf',DecisionTreeClassifier())])
+scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
+scores.mean()
+
+
+pipe_rf = Pipeline([('pca', IncrementalPCA()), ('clf',DecisionTreeClassifier())])
+scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
+scores.mean()
+
+pipe_rf = Pipeline([('pca', SparsePCA()), ('clf',DecisionTreeClassifier())])
+scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
+scores.mean()
