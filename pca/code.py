@@ -26,17 +26,15 @@ d = data.ix[:, 2:32]
 data = pd.read_csv('../SPECTF.data')
 target = data.ix[:, 0]
 d = data.ix[:, 1:45]
-
+d = StandardScaler().fit_transform(d.values)
 
 # PCA
-
-
 
 def pca(matrix, plot=False, dataset_name=''):
     """ Calculate matrix PCA  """
 
     # Standardize the data
-    matrix = StandardScaler().fit_transform(matrix.values)
+#    matrix = StandardScaler().fit_transform(matrix.values)
 
     # Calculate the covariance matrix
     cov_m = np.cov(matrix.T)
@@ -66,14 +64,14 @@ def pca(matrix, plot=False, dataset_name=''):
     evecs = evecs[:, :3]
     # carry out the transformation on the data using eigenvectors
     # and return the re-scaled data, eigenvalues, and eigenvectors
-    return np.dot(evecs.T, X.T).T, evals, evecs
+    return np.dot(evecs.T, matrix.T).T, evals, evecs
 
 
 # SVD
 
 def svd(data, target, S=2, plot=False):
-    # Standardize the data
-    data = StandardScaler().fit_transform(data.values)
+#    # Standardize the data
+#    data = StandardScaler().fit_transform(data.values)
     #calculate SVD
     U, s, V = np.linalg.svd(data)
     Sig = np.mat(np.eye(S)*s[:S])
@@ -99,7 +97,7 @@ def svd(data, target, S=2, plot=False):
 time = 0.
 for i in range(500):
     start = timeit.timeit()
-    pca(X)
+    pca(d)
     end = timeit.timeit()
     time += end - start
 time / 500.
@@ -108,20 +106,44 @@ time / 500.
 time = 0.
 for i in range(500):
     start = timeit.timeit()
-    svd(X, 1)
+    svd(d, 1)
     end = timeit.timeit()    
     time += end - start
 time / 500.
 
 # Kernel PCA
-kpca = KernelPCA(aernel="rbf", fit_inverse_transform=true, gamma=10)
+kpca = KernelPCA(kernel="rbf", fit_inverse_transform=true, gamma=10)
 time = 0.
 for i in range(500):
     start = timeit.timeit()
-    kpca.fit_transform(x)
+    kpca.fit_transform(d)
     end = timeit.timeit()
     time += end - start
 time / 500.
+
+
+fica = FastICA(whiten=True, max_iter=500)
+time = 0.
+for i in range(500):
+    start = timeit.timeit()
+    fica.fit_transform(d)
+    end = timeit.timeit()
+    time += end - start
+time / 500.
+
+
+###################################################################################
+
+rng = np.random.RandomState(0)
+mbspca =  MiniBatchSparsePCA(alpha=0.8, n_iter=100, batch_size=3, random_state=rng)
+time = 0.
+for i in range(500):
+    start = timeit.timeit()
+    mbspca.fit_transform(d)
+    end = timeit.timeit()
+    time += end - start
+time / 500.
+
 
 tree = DecisionTreeClassifier()
 scores = model_selection.cross_val_score(tree, d, target, cv=10, scoring='accuracy')
@@ -132,12 +154,12 @@ scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='acc
 scores.mean()
 
 
-pipe_rf = Pipeline([('pca', kernelpca(kernel="rbf")), ('clf',decisiontreeclassifier())])
+pipe_rf = Pipeline([('pca', KernelPCA(kernel="rbf", n_components=11)), ('clf',DecisionTreeClassifier())])
 scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
 scores.mean()
 
 
-pipe_rf = Pipeline([('pca', FastICA(n_components=22, whiten=True, max_iter=500)), ('clf',decisiontreeclassifier())])
+pipe_rf = Pipeline([('pca', FastICA(n_components=22, whiten=True, max_iter=500)), ('clf',DecisionTreeClassifier())])
 scores = model_selection.cross_val_score(pipe_rf, d, target, cv=10, scoring='accuracy')
 scores.mean()
 
